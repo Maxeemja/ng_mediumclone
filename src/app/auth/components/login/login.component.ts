@@ -4,23 +4,26 @@ import {Store} from '@ngrx/store'
 import {authActions} from '../../store/actions'
 import {RegisterRequestInterface} from '../../types/registerRequest.interface'
 import {RouterLink} from '@angular/router'
-import {AuthStateInterface} from '../../types/authState.interface'
 import {CommonModule} from '@angular/common'
 import {selectIsSubmitting, selectValidationErrors} from '../../store/reducers'
-import {AuthService} from '../../services/auth.service'
 import {combineLatest} from 'rxjs'
-import { BackendErrorMessages } from '../../../shared/components/backendErrorMessages/backendErrorMessages.component'
+import {BackendErrorMessages} from '../../../shared/components/backendErrorMessages/backendErrorMessages.component'
+import {LoginRequestInterface} from '../../types/loginRequest.interface'
 
 @Component({
-  selector: 'mc-register',
+  selector: 'mc-login',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, CommonModule, BackendErrorMessages],
-  templateUrl: './register.component.html',
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    CommonModule,
+    BackendErrorMessages,
+  ],
+  templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegisterComponent {
+export class LoginComponent {
   public form = this.fb.nonNullable.group({
-    username: ['', Validators.required],
     email: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(8)]],
   })
@@ -35,9 +38,9 @@ export class RegisterComponent {
   ) {}
 
   onSubmit() {
-    const request: RegisterRequestInterface = {
+    const request: LoginRequestInterface = {
       user: this.form.getRawValue(),
     }
-    this.store.dispatch(authActions.register({request}))
+    this.store.dispatch(authActions.login({request}))
   }
 }

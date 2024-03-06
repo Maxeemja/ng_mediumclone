@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core'
-import {BackendErrorsInterface} from '../types/backendErrors.interface'
+import {BackendErrorsInterface} from '../../types/backendErrors.interface'
 import {CommonModule} from '@angular/common'
 
 @Component({
@@ -13,8 +13,10 @@ export class BackendErrorMessages implements OnInit {
   errorMessages: string[] = []
 
   ngOnInit() {
-    this.errorMessages = Object.keys(this.backendErrors).map((name) =>
-      this.backendErrors[name].join(' '),
-    )
+    this.errorMessages = Object.keys(this.backendErrors).map((name) => {
+      const messages = this.backendErrors[name].join(' ')
+
+      return `${name} ${messages}`
+    })
   }
 }
