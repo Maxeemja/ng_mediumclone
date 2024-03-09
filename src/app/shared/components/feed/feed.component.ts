@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core'
+import {Component, Input, OnInit, SimpleChanges} from '@angular/core'
 import {Store} from '@ngrx/store'
 import {feedActions} from './store/actions'
 import {combineLatest} from 'rxjs'
@@ -16,7 +16,8 @@ import {LoadingComponent} from '../loading/loading.component'
 import {environment} from '../../../../environments/environment.development'
 import {PaginationComponent} from '../pagination/pagination.component'
 import queryString from 'query-string'
-import { TagListComponent } from '../tagList/tagList.component'
+import {TagListComponent} from '../tagList/tagList.component'
+import {popularTagsActions} from '../popularTags/store/actions'
 
 @Component({
   selector: 'mc-feed',
@@ -28,7 +29,7 @@ import { TagListComponent } from '../tagList/tagList.component'
     ErrorMessageComponent,
     LoadingComponent,
     PaginationComponent,
-    TagListComponent
+    TagListComponent,
   ],
 })
 export class FeedComponent implements OnInit {
@@ -55,7 +56,16 @@ export class FeedComponent implements OnInit {
       this.currentPage = Number(params['page'] || '1')
       this.fetchFeed()
     })
+  }
 
+  ngOnChanges(changes: SimpleChanges) {
+    const isApiUrlChanged =
+      !changes['apiUrl'].firstChange &&
+      changes['apiUrl'].currentValue !== changes['apiUrl'].previousValue
+
+    if (isApiUrlChanged) {
+      this.fetchFeed()
+    }
   }
 
   fetchFeed() {
@@ -64,10 +74,11 @@ export class FeedComponent implements OnInit {
     const stringifiedParams = queryString.stringify({
       limit: this.limit,
       offset,
-      ...parsedUrl.query
+      ...parsedUrl.query,
     })
     const apiUrlWithParams = `${parsedUrl.url}?${stringifiedParams}`
     console.log(parsedUrl)
     this.store.dispatch(feedActions.getFeed({url: apiUrlWithParams}))
+    this.store.dispatch(popularTagsActions.getTags())
   }
 }
