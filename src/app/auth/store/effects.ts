@@ -8,6 +8,27 @@ import {HttpErrorResponse} from '@angular/common/http'
 import {PersistanceService} from '../../shared/services/persistance.service'
 import {Router} from '@angular/router'
 
+export const getCurrentUserEffect = createEffect(
+  (
+    actions$ = inject(Actions),
+    authService = inject(AuthService),
+    persistanceService = inject(PersistanceService),
+  ) => {
+    return actions$.pipe(
+      ofType(authActions.getCurrentUser),
+      switchMap(() =>
+        authService.getCurrentUser().pipe(
+          map((currentUser: CurrentUserInterface) => {
+            return authActions.getCurrentUserSuccess({currentUser})
+          }),
+          catchError(() => of(authActions.getCurrentUserFailure())),
+        ),
+      ),
+    )
+  },
+  {functional: true},
+)
+
 export const registerEffect = createEffect(
   (
     actions$ = inject(Actions),
@@ -78,8 +99,6 @@ export const loginEffect = createEffect(
   },
   {functional: true},
 )
-
-
 
 export const redirectAfterLoginEffect = createEffect(
   (actions$ = inject(Actions), router = inject(Router)) => {
