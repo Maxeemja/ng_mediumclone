@@ -9,9 +9,8 @@ export const getFeedEffect = createEffect(
   (actions$ = inject(Actions), feedService = inject(FeedService)) => {
     return actions$.pipe(
       ofType(feedActions.getFeed),
-      switchMap((props) => {
-        console.log(props)
-        return feedService.getFeed(props.url).pipe(
+      switchMap(({url}) => {
+        return feedService.getFeed(url).pipe(
           map((feed: GetFeedResponseInterface) => {
             return feedActions.getFeedSuccess({feed})
           }),
