@@ -1,36 +1,34 @@
-<ng-container *ngIf="data$ | async as data">
-  <mc-loading *ngIf="data.isLoading"></mc-loading>
-  <mc-error-message
-    *ngIf="data.error"
-    [message]="data.error"
-  ></mc-error-message>
+<mc-loading *ngIf="feedStore.isLoading()"></mc-loading>
+<mc-error-message
+  *ngIf="feedStore.error() as errorMessage"
+  [message]="errorMessage"
+></mc-error-message>
 
-  <div *ngIf="data.feed">
-    <div class="article-preview" *ngFor="let article of data.feed.articles">
-      <div class="article-meta">
-        <a [routerLink]="['/profiles', article.author.username]">
-          <img [src]="article.author.image" alt="" />
-        </a>
-        <div class="info">
-          <a [routerLink]="['/profiles', article.author.username]">
-            {{ article.author.username }}
-          </a>
-          <span class="date">{{ article.createdAt | date: 'dd-MM-yyyy' }}</span>
-        </div>
-        <div class="pull-xs-right">ADD TO FAVORITES</div>
-      </div>
-      <a [routerLink]="['/articles', article.slug]" class="preview-link">
-        <h1>{{ article.title }}</h1>
-        <p>{{ article.description }}</p>
-        <span>Read more</span>
-        <mc-tag-list [tags]="article.tagList"></mc-tag-list>
+<div *ngIf="feedStore.data() as feedData">
+  <div class="article-preview" *ngFor="let article of feedData.articles">
+    <div class="article-meta">
+      <a [routerLink]="['/profiles', article.author.username]">
+        <img [src]="article.author.image" alt="" />
       </a>
+      <div class="info">
+        <a [routerLink]="['/profiles', article.author.username]">
+          {{ article.author.username }}
+        </a>
+        <span class="date">{{ article.createdAt | date: 'dd-MM-yyyy' }}</span>
+      </div>
+      <div class="pull-xs-right">ADD TO FAVORITES</div>
     </div>
-    <mc-pagination
-      [total]="data.feed.articlesCount"
-      [limit]="limit"
-      [url]="baseUrl"
-      [currentPage]="currentPage"
-    ></mc-pagination>
+    <a [routerLink]="['/articles', article.slug]" class="preview-link">
+      <h1>{{ article.title }}</h1>
+      <p>{{ article.description }}</p>
+      <span>Read more</span>
+      <mc-tag-list [tags]="article.tagList"></mc-tag-list>
+    </a>
   </div>
-</ng-container>
+  <mc-pagination
+    [total]="feedData.articlesCount"
+    [limit]="limit"
+    [url]="baseUrl"
+    [currentPage]="currentPage"
+  ></mc-pagination>
+</div>

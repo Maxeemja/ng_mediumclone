@@ -1,8 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core'
-import {Store} from '@ngrx/store'
-import {selectCurrentUser} from '../../../auth/store/reducers'
+import {Component, Input, inject} from '@angular/core'
 import {CommonModule} from '@angular/common'
 import {RouterLink, RouterLinkActive} from '@angular/router'
+import {AuthStore} from '../../../auth/store/reducers'
 
 @Component({
   selector: 'mc-feed-toggler',
@@ -10,11 +9,8 @@ import {RouterLink, RouterLinkActive} from '@angular/router'
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
 })
-export class FeedTogglerComponent implements OnInit {
+export class FeedTogglerComponent {
   @Input() tagName?: string
 
-  currentUser$ = this.store.select(selectCurrentUser)
-  constructor(private store: Store) {}
-
-  ngOnInit() {}
+  readonly authStore = inject(AuthStore)
 }

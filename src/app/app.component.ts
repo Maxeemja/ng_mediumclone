@@ -1,8 +1,7 @@
 import {Component, OnInit, inject} from '@angular/core'
 import {RouterOutlet} from '@angular/router'
 import {TopBarComponent} from './shared/components/topBar/topBar.component'
-import {Store} from '@ngrx/store'
-import {authActions} from './auth/store/actions'
+import {AuthStore} from './auth/store/reducers'
 
 @Component({
   selector: 'app-root',
@@ -13,9 +12,9 @@ import {authActions} from './auth/store/actions'
 })
 export class AppComponent implements OnInit {
   title = 'Medium Clone App'
-  store = inject(Store)
+  authStore = inject(AuthStore)
 
   ngOnInit(): void {
-    this.store.dispatch(authActions.getCurrentUser())
+    this.authStore.getCurrentUser()
   }
 }

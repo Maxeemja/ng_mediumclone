@@ -1,8 +1,4 @@
-import {Component, Input, OnInit, SimpleChanges} from '@angular/core'
-import {Store} from '@ngrx/store'
-import {feedActions} from './store/actions'
-import {combineLatest} from 'rxjs'
-import {selectError, selectFeedData, selectIsLoading} from './store/reducers'
+import {Component, Input, OnInit, SimpleChanges, inject} from '@angular/core'
 import {CommonModule} from '@angular/common'
 import {
   ActivatedRoute,
@@ -17,7 +13,8 @@ import {environment} from '../../../../environments/environment.development'
 import {PaginationComponent} from '../pagination/pagination.component'
 import queryString from 'query-string'
 import {TagListComponent} from '../tagList/tagList.component'
-import {popularTagsActions} from '../popularTags/store/actions'
+import {FeedStore} from './store/reducers'
+import {PopularTagsStore} from '../popularTags/store/reducers'
 
 @Component({
   selector: 'mc-feed',
@@ -34,24 +31,18 @@ import {popularTagsActions} from '../popularTags/store/actions'
 })
 export class FeedComponent implements OnInit {
   @Input() apiUrl: string = ''
-
-  data$ = combineLatest({
-    isLoading: this.store.select(selectIsLoading),
-    error: this.store.select(selectError),
-    feed: this.store.select(selectFeedData),
-  })
+  readonly feedStore = inject(FeedStore)
+  readonly popularTagsStore = inject(PopularTagsStore)
   limit = environment.limit
   baseUrl = this.router.url.split('?')[0]
   currentPage: number = 1
 
   constructor(
-    private store: Store,
     private router: Router,
     private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
-    this.store.dispatch(feedActions.getFeed({url: this.apiUrl}))
     this.route.queryParams.subscribe((params: Params) => {
       this.currentPage = Number(params['page'] || '1')
       this.fetchFeed()
@@ -78,7 +69,7 @@ export class FeedComponent implements OnInit {
     })
     const apiUrlWithParams = `${parsedUrl.url}?${stringifiedParams}`
     console.log(parsedUrl)
-    this.store.dispatch(feedActions.getFeed({url: apiUrlWithParams}))
-    this.store.dispatch(popularTagsActions.getTags())
+    this.feedStore.getFeed(apiUrlWithParams)
+    this.popularTagsStore.getTags()
   }
 }

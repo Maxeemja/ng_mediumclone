@@ -1,20 +1,18 @@
-<ng-container *ngIf="data$ | async as data">
-  <mc-loading *ngIf="data.isLoading"></mc-loading>
-  <mc-error-message
-    *ngIf="data.error"
-    [message]="data.error"
-  ></mc-error-message>
+<mc-loading *ngIf="popularTagsStore.isLoading()"></mc-loading>
+<mc-error-message
+  *ngIf="popularTagsStore.error() as errorMessage"
+  [message]="errorMessage"
+></mc-error-message>
 
-  <div class="sidebar" *ngIf="data.popularTags?.tags as tags">
-    <p>Popular tags</p>
-    <div class="tag-list">
-      <a
-        *ngFor="let tag of tags"
-        [routerLink]="['/tags', tag]"
-        class="tag-default tag-pill"
-      >
-        {{ tag }}
-      </a>
-    </div>
+<div class="sidebar" *ngIf="popularTagsStore.data()?.tags as tags">
+  <p>Popular tags</p>
+  <div class="tag-list">
+    <a
+      *ngFor="let tag of tags"
+      [routerLink]="['/tags', tag]"
+      class="tag-default tag-pill"
+    >
+      {{ tag }}
+    </a>
   </div>
-</ng-container>
+</div>

@@ -1,7 +1,10 @@
-import {createFeature, createReducer, on} from '@ngrx/store'
-import {popularTagsActions} from './actions'
-import {routerNavigationAction} from '@ngrx/router-store'
+import {inject} from '@angular/core'
+import {patchState, signalStore, withMethods, withState} from '@ngrx/signals'
+import {rxMethod} from '@ngrx/signals/rxjs-interop'
+import {tapResponse} from '@ngrx/operators'
+import {pipe, switchMap, tap} from 'rxjs'
 import {PopularTagsStateInterface} from '../types/popularTagsState.interface'
+import {PopularTagsService} from '../services/tags.service'
 
 const initialState: PopularTagsStateInterface = {
   isLoading: false,
@@ -9,31 +12,29 @@ const initialState: PopularTagsStateInterface = {
   data: null,
 }
 
-const tagsFeature = createFeature({
-  name: 'tags',
-  reducer: createReducer(
-    initialState,
-    on(popularTagsActions.getTags, (state) => ({
-      ...state,
-      isLoading: true,
-    })),
-    on(popularTagsActions.getTagsSuccess, (state, action) => ({
-      ...state,
-      isLoading: false,
-      data: action.tags,
-    })),
-    on(popularTagsActions.getTagsFailure, (state) => ({
-      ...state,
-      isLoading: false,
-    })),
-    on(routerNavigationAction, () => initialState),
-  ),
-})
-
-export const {
-  name: tagsFeatureKey,
-  reducer: tagsReducer,
-  selectIsLoading,
-  selectData: selectTagsData,
-  selectError,
-} = tagsFeature
+export const PopularTagsStore = signalStore(
+  {providedIn: 'root'},
+  withState(initialState),
+  withMethods((store, popularTagsService = inject(PopularTagsService)) => ({
+    getTags: rxMethod<void>(
+      pipe(
+        tap(() => {
+          patchState(store, {isLoading: true, error: null})
+        }),
+        switchMap(() =>
+          popularTagsService.getTags().pipe(
+            tapResponse({
+              next: (tags) => {
+                patchState(store, {isLoading: false, data: tags})
+              },
+              error: () => {
+                patchState(store, {isLoading: false})
+              },
+            }),
+          ),
+        ),
+      ),
+    ),
+    reset: () => patchState(store, initialState),
+  })),
+)

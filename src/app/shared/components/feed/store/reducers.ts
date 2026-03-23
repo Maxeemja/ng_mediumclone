@@ -1,7 +1,10 @@
-import {createFeature, createReducer, on} from '@ngrx/store'
+import {inject} from '@angular/core'
+import {patchState, signalStore, withMethods, withState} from '@ngrx/signals'
+import {rxMethod} from '@ngrx/signals/rxjs-interop'
+import {tapResponse} from '@ngrx/operators'
+import {pipe, switchMap, tap} from 'rxjs'
+import {FeedService} from '../service/feed.service'
 import {FeedStateInterface} from '../types/feedState.interface'
-import {feedActions} from './actions'
-import {routerNavigationAction} from '@ngrx/router-store'
 
 const initialState: FeedStateInterface = {
   isLoading: false,
@@ -9,31 +12,29 @@ const initialState: FeedStateInterface = {
   data: null,
 }
 
-const feedFeature = createFeature({
-  name: 'feed',
-  reducer: createReducer(
-    initialState,
-    on(feedActions.getFeed, (state) => ({
-      ...state,
-      isLoading: true,
-    })),
-    on(feedActions.getFeedSuccess, (state, action) => ({
-      ...state,
-      isLoading: false,
-      data: action.feed,
-    })),
-    on(feedActions.getFeedFailure, (state) => ({
-      ...state,
-      isLoading: false,
-    })),
-    on(routerNavigationAction, () => initialState),
-  ),
-})
-
-export const {
-  name: feedFeatureKey,
-  reducer: feedReducer,
-  selectIsLoading,
-  selectData: selectFeedData,
-  selectError
-} = feedFeature
+export const FeedStore = signalStore(
+  {providedIn: 'root'},
+  withState(initialState),
+  withMethods((store, feedService = inject(FeedService)) => ({
+    getFeed: rxMethod<string>(
+      pipe(
+        tap(() => {
+          patchState(store, {isLoading: true, error: null})
+        }),
+        switchMap((url) =>
+          feedService.getFeed(url).pipe(
+            tapResponse({
+              next: (feed) => {
+                patchState(store, {isLoading: false, data: feed})
+              },
+              error: () => {
+                patchState(store, {isLoading: false})
+              },
+            }),
+          ),
+        ),
+      ),
+    ),
+    reset: () => patchState(store, initialState),
+  })),
+)

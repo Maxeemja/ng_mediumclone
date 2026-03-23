@@ -1,6 +1,6 @@
 <div class="feed-toggle">
   <ul class="nav nav-pills outline-active">
-    <li class="nav-item" *ngIf="currentUser$ | async">
+    <li class="nav-item" *ngIf="authStore.currentUser()">
       <a routerLink="/feed" class="nav-link" routerLinkActive="active">
         Your Feed
       </a>

@@ -1,9 +1,7 @@
-import {Component, OnInit} from '@angular/core'
-import {Store} from '@ngrx/store'
-import {selectCurrentUser} from '../../../auth/store/reducers'
-import {combineLatest} from 'rxjs'
+import {Component, inject} from '@angular/core'
 import {RouterLink} from '@angular/router'
 import { CommonModule } from '@angular/common'
+import {AuthStore} from '../../../auth/store/reducers'
 
 @Component({
   selector: 'mc-topbar',
@@ -11,11 +9,6 @@ import { CommonModule } from '@angular/common'
   standalone: true,
   imports: [RouterLink, CommonModule],
 })
-export class TopBarComponent implements OnInit {
-  data$ = combineLatest({
-    currentUser: this.store.select(selectCurrentUser),
-  })
-  constructor(private store: Store) {}
-
-  ngOnInit() {}
+export class TopBarComponent {
+  readonly authStore = inject(AuthStore)
 }
